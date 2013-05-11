@@ -32,18 +32,16 @@ var init3D = function() {
     };
   };
 
-  // set the scene size
   var
-    WIDTH = window.innerWidth,
-    HEIGHT = window.innerHeight,
+    sceneWidth = window.innerWidth,
+    sceneHeight = window.innerHeight,
     mousePos = { x: null, y: null },
     factor = { x: null, y: null },
     stars = [];
 
-  // set some camera attributes
   var cameraOpts = {
     angle: 45,
-    aspect: WIDTH / HEIGHT,
+    aspect: sceneWidth / sceneHeight,
     near: 0.1,
     far: 10000,
     position: {
@@ -53,46 +51,34 @@ var init3D = function() {
     }
   };
 
-  // create a WebGL renderer, camera
-  // and a scene
   var renderer = new THREE.WebGLRenderer();
+
   var camera = new THREE.PerspectiveCamera(
     cameraOpts.angle,
     cameraOpts.aspect,
     cameraOpts.near,
     cameraOpts.far
   );
+  camera.position.z = cameraOpts.position.z;
 
   var scene = new THREE.Scene();
 
-  // add the camera to the scene
   scene.add(camera);
 
-  // the camera starts at 0,0,0
-  // so pull it back
-  camera.position.z = cameraOpts.position.z;
+  renderer.setSize(sceneWidth, sceneHeight);
 
-  // start the renderer
-  renderer.setSize(WIDTH, HEIGHT);
-
-  // attach the render-supplied DOM element
   document.body.appendChild(renderer.domElement);
 
-  // set up the sphere vars
   var
     radius = 30,
     segments = 15,
-    rings = 90;
+    rings = 90,
 
-  // create the obj's material
-  var sphereMaterial = new THREE.MeshLambertMaterial({
-    color: 0xCCCC00
-  });
+    sphereMaterial = new THREE.MeshLambertMaterial({
+      color: 0xCCCC00
+    }),
 
-  // create a new mesh with
-  // sphere geometry - we will cover
-  // the sphereMaterial next!
-  var sphere = new THREE.Mesh(
+    sphere = new THREE.Mesh(
     new THREE.TorusKnotGeometry(
       radius,
       segments,
@@ -101,42 +87,38 @@ var init3D = function() {
     sphereMaterial
   );
 
-  // add the sphere to the scene
   scene.add(sphere);
 
 
-  // add the "stars"
+  // add "stars"
   for (var i = 0; i < 1000; i++) {
     var material = new THREE.MeshLambertMaterial({
       color: 0xFFFFFF
     });
     var star = new THREE.Mesh(
-      new THREE.SphereGeometry(2, 15, 30),
+      new THREE.SphereGeometry(3, 15, 30),
       material
     );
-    star.position.x = Math.random() * WIDTH - WIDTH/2;
-    star.position.y = Math.random() * HEIGHT - HEIGHT/2;
+    star.position.x = Math.random() * sceneWidth - sceneWidth/2;
+    star.position.y = Math.random() * sceneHeight - sceneHeight/2;
     star.position.z = Math.random() * cameraOpts.position.z;
     stars.push(star);
     scene.add(star);
   }
 
-  // create a point light
   var pointLight = new THREE.PointLight(0xFFFFFF);
 
-  // set its position
   pointLight.position.x = 10;
   pointLight.position.y = 50;
   pointLight.position.z = 300;
 
-  // add to the scene
   scene.add(pointLight);
 
   /**************************************
    * RENDER
    **************************************/
   var render = function() {
-    sphere.position.z -= 2;
+    sphere.position.z -= 0.5;
 
     sphere.rotation.x += 0.02;
     sphere.rotation.y += 0.02;
@@ -146,8 +128,8 @@ var init3D = function() {
     pointLight.position.y = 50 + 100*factor.y;//mousePos.y;
 
     //camera.position.x = camera.position.x * factor.x;
-    //camera.position.y = HEIGHT/2 - mousePos.y;
-    camera.position.z += factor.y/50;//= cameraOpts.position.z - 400*factor.x;
+    //camera.position.y = sceneHeight/2 - mousePos.y;
+    camera.position.z += factor.y/80;//= cameraOpts.position.z - 400*factor.x;
 
     camera.rotation.x += factor.y/50;
     camera.rotation.y += factor.x/50;
@@ -158,7 +140,7 @@ var init3D = function() {
       if (stars[i].position.z > camera.position.z+200)
         stars[i].position.z -= (1000 + Math.random() * 500);
 
-      stars[i].opacity = 0.5;//if (stars[i].position.z < camera.position.z - 1500
+      stars[i].opacity = 1;//if (stars[i].position.z < camera.position.z - 1500
     }
 
     renderer.render(scene, camera);
@@ -166,11 +148,10 @@ var init3D = function() {
   /**************************************/
 
   document.addEventListener("mousemove", function(e) {
-    console.log("e: ", e);
     mousePos = getMousePos(e.target, e);
     factor = {
-      x: (0.5 - mousePos.x / WIDTH) / 0.5,
-      y: (0.5 - mousePos.y / HEIGHT) / 0.5
+      x: (0.5 - mousePos.x / sceneWidth) / 0.5,
+      y: (0.5 - mousePos.y / sceneHeight) / 0.5
     };
 
     //console.log("%d;%d | %f;%f", mousePos.x, mousePos.y, factor.x, factor.y);
@@ -203,15 +184,15 @@ var init3D = function() {
   }, false);
 
   document.addEventListener("resize", function(e) {
-    WIDTH = window.innerWidth;
-    HEIGHT = window.innerHeight;
+    sceneWidth = window.innerWidth;
+    sceneHeight = window.innerHeight;
 
-    scene.setSize(WIDTH, HEIGHT);
+    scene.setSize(sceneWidth, sceneHeight);
 
-    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setSize(sceneWidth, sceneHeight);
 
-    renderer.domElement.width = WIDTH;
-    renderer.domElement.height = HEIGHT;
+    renderer.domElement.width = sceneWidth;
+    renderer.domElement.height = sceneHeight;
   }, false);
 
   toggleLoadingIndicator(false);
