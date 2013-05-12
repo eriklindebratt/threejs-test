@@ -51,7 +51,7 @@ var init3D = function() {
     }
   };
 
-  var renderer = new THREE.WebGLRenderer();
+  var renderer = new THREE.WebGLRenderer({ antialias: true });
 
   var camera = new THREE.PerspectiveCamera(
     cameraOpts.angle,
